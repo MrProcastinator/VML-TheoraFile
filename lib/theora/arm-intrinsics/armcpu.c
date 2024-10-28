@@ -106,6 +106,10 @@ ogg_uint32_t oc_cpu_flags_get(void) {
   return flags;
 }
 
+#elif defined(__vita__)
+ogg_uint32_t oc_cpu_flags_get(void){
+  return OC_CPU_ARM_NEON;
+}
 #else
 /*The feature registers which can tell us what the processor supports are
    accessible in priveleged modes only, so we can't have a general user-space
