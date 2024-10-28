@@ -26,6 +26,7 @@
 
 #region Using Statements
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 #endregion
@@ -40,22 +41,26 @@ public static class Theorafile
 
 	#region UTF8 Marshaling
 
+	/* Used for stack allocated string marshaling. */
+	public static int Utf8Size(string str)
+	{
+		if (str == null)
+		{
+			return 0;
+		}
+		return (str.Length * 4) + 1;
+	}
+
 	/* Used for heap allocated string marshaling
 	 * Returned byte* must be free'd with FreeHGlobal.
 	 */
 	private static unsafe byte* Utf8Encode(string str)
 	{
-		int bufferSize = (str.Length * 4) + 1;
+		int bufferSize = Utf8Size(str);
 		byte* buffer = (byte*) Marshal.AllocHGlobal(bufferSize);
-		fixed (char* strPtr = str)
-		{
-			Encoding.UTF8.GetBytes(
-				strPtr,
-				str.Length + 1,
-				buffer,
-				bufferSize
-			);
-		}
+		byte[] utf8Bytes = Encoding.UTF8.GetBytes(str);
+		Marshal.Copy(utf8Bytes, 0, (IntPtr)buffer, bufferSize);
+		buffer[bufferSize] = 0;
 		return buffer;
 	}
 
@@ -126,7 +131,8 @@ public static class Theorafile
 
 	#region Theorafile Implementation
 
-	[DllImport(nativeLibName, EntryPoint = "tf_open_callbacks", CallingConvention = CallingConvention.Cdecl)]
+	/* Original method: "tf_open_callbacks" */
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	private static extern int INTERNAL_tf_open_callbacks(
 		IntPtr datasource,
 		IntPtr file,
@@ -141,12 +147,14 @@ public static class Theorafile
 		return INTERNAL_tf_open_callbacks(datasource, file, io);
 	}
 
-	[DllImport(nativeLibName, EntryPoint = "tf_fopen", CallingConvention = CallingConvention.Cdecl)]
+	/* Original method: "tf_fopen" */
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	private static extern unsafe int INTERNAL_tf_fopen(
 		byte* fname,
 		IntPtr file
 	);
-	[DllImport(nativeLibName, EntryPoint = "tf_fopen", CallingConvention = CallingConvention.Cdecl)]
+	/* Original method: "tf_fopen" */
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	private static extern unsafe int INTERNAL_tf_fopen(
 		[MarshalAs(UnmanagedType.LPStr)] string fname,
 		IntPtr file
@@ -170,7 +178,8 @@ public static class Theorafile
 		return result;
 	}
 
-	[DllImport(nativeLibName, EntryPoint = "tf_close", CallingConvention = CallingConvention.Cdecl)]
+	/* Original method: "tf_close" */
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	private static extern int INTERNAL_tf_close(IntPtr file);
 	public static int tf_close(ref IntPtr file)
 	{
@@ -180,13 +189,13 @@ public static class Theorafile
 		return result;
 	}
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_hasaudio(IntPtr file);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_hasvideo(IntPtr file);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern void tf_videoinfo(
 		IntPtr file,
 		out int width,
@@ -195,29 +204,29 @@ public static class Theorafile
 		out th_pixel_fmt fmt
 	);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern void tf_audioinfo(
 		IntPtr file,
 		out int channels,
 		out int samplerate
 	);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_setaudiotrack(IntPtr file, int track);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_setvideotrack(IntPtr file, int track);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_eos(IntPtr file);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern void tf_reset(IntPtr file);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_readvideo(IntPtr file, IntPtr buffer, int numframes);
 
-	[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+	[MethodImplAttribute(MethodImplOptions.InternalCall)]
 	public static extern int tf_readaudio(IntPtr file, IntPtr buffer, int length);
 
 	#endregion
