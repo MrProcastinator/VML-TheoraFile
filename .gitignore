@@ -4,3 +4,6 @@ xcuserdata/
 
 bin/
 obj/
+
+.vscode/
+build*/
