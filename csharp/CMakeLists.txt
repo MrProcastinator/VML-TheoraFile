@@ -7,6 +7,7 @@ set(LIBRARY_NAME Theorafile)
 compile_mono_single_assembly_aot(
   CODE_FILE ${LIBRARY_NAME}
   FLAGS unsafe
+  OPTIMIZE
 )
 add_library(VML${LIBRARY_NAME} STATIC
   ${LIBRARY_NAME}.c
