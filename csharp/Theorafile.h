@@ -2,5 +2,6 @@
 #define _VML_FNA_THEORAFILE_H_
 
 extern void VMLFNATheorafileRegister();
+extern void VMLFNATheorafileRegisterDynamic();
 
 #endif
