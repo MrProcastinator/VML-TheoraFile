@@ -3,12 +3,8 @@
 
 #include "../theorafile.h"
 
-extern void** mono_aot_module_Theorafile_info;
-
-void VMLFNATheorafileRegister()
+void VMLFNATheorafileRegisterCalls()
 {
-	mono_aot_register_module(mono_aot_module_Theorafile_info);
-
 	mono_add_internal_call("Theorafile::INTERNAL_tf_open_callbacks", tf_open_callbacks);
 	mono_add_internal_call("Theorafile::INTERNAL_tf_fopen", tf_fopen);
 	mono_add_internal_call("Theorafile::INTERNAL_tf_fopen", tf_fopen);
