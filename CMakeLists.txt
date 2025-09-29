@@ -27,7 +27,7 @@ if(BUILD_SHARED_LIBS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -fno-optimize-sibling-calls")
 
 set(SRCDIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -134,11 +134,20 @@ else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic -fPIC")
 endif()
 
+# Library name
+set(THEORAFILE_LIBRARY_NAME theorafile)
+if(VITA)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(THEORAFILE_LIBRARY_NAME theorafile_debug)
+    endif()
+endif()
 
 # Targets
 add_library(theorafile ${TARGET} ${TFSRC_ARCH_GENERIC} ${TFSRC_ARCH_OPT})
 target_include_directories(theorafile PUBLIC ${INCLUDES})
 target_compile_definitions(theorafile PUBLIC ${DEFINES})
+
+set_target_properties(theorafile PROPERTIES OUTPUT_NAME ${THEORAFILE_LIBRARY_NAME})
 
 if(BUILD_TESTS)
     add_executable(theorafile-test sdl2test/sdl2test.c)
